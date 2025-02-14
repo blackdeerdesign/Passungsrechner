@@ -114,6 +114,48 @@
             font-size: 13px;
         }
 
+        footer {
+            margin-top: 40px;
+        }
+
+        .footer-top {
+            background-color: black;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-top .footer-link {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .footer-top .footer-link:hover {
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            background-color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .footer-bottom a {
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .footer-bottom img {
+            height: 50px;
+            transition: transform 0.2s;
+        }
+
+        .footer-bottom img:hover {
+            transform: scale(1.1);
+        }
 
     </style>
 
@@ -215,6 +257,34 @@
             </div>
         </div>
     </main>
+
+    <footer>
+        <div class="footer-top">
+            <a href="https://black-deer-design.de/" target="_blank" class="footer-link">Website</a>
+            <a href="mailto:mail@black-deer-design.de" class="footer-link">Mail: mail@black-deer-design.de</a>
+            <a href="https://black-deer-design.de/impressum/" target="_blank" class="footer-link">Impressum</a>
+        </div>
+        <div class="footer-bottom">
+            <a href="https://www.facebook.com/bl.deerdesign" target="_blank">
+                <img src="Facebook.png" alt="Facebook">
+            </a>
+            <a href="https://www.instagram.com/black.deer.design/?hl=de" target="_blank">
+                <img src="instagram.png" alt="Instagram">
+            </a>
+            <a href="https://www.linkedin.com/in/marcel-jochim-045530225/" target="_blank">
+                <img src="LinkedIn.png" alt="LinkedIn">
+            </a>
+            <a href="https://www.youtube.com/@black-deer-design6262" target="_blank">
+                <img src="youtube.png" alt="YouTube">
+            </a>
+            <a href="https://de.pinterest.com/BlackDeerDesign" target="_blank">
+                <img src="Pinterest.png" alt="YouTube">
+            </a>
+            <a href="https://paypal.me/blackdeerdesign?country.x=DE&locale.x=de_DE" target="_blank">
+                <img src="paypal.png" alt="PayPal Donate">
+            </a>
+        </div>
+    </footer>
 
 <script>
     let datenWellen = [];
