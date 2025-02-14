@@ -3,7 +3,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlackDeerDesign - Passungsrechner</title>
+
     <style>
+
         * {
             margin: 0;
             padding: 0;
@@ -20,6 +22,7 @@
             background-color: #ffffff;
             padding: 20px;
             text-align: center;
+            position: relative;
         }
 
         .header-white img {
@@ -77,6 +80,23 @@
             font-weight: bold;
         }
 
+        td {
+            background-color: #f9f9f9;
+        }
+
+        td:first-child, th:first-child {
+            width: 180px; 
+        }
+
+        td:last-child, th:last-child {
+            width: 120px;
+        }
+
+        h3 {
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
         .back-button {
             position: absolute;
             top: 20px;
@@ -95,8 +115,11 @@
         .back-button:hover {
             background-color: #0890CC;
         }
+
     </style>
+
 </head>
+
 <body>
     <header class="header-white">
         <img src="logo.jpg" alt="Logo">
@@ -107,7 +130,7 @@
     </div>
 
     <main>
-        <a href="#" class="back-button">Zurück</a>
+
         <div class="container">
             <table>
                 <tr>
@@ -217,5 +240,6 @@
         document.getElementById('bohrungspassung').addEventListener('change', berechnenBohrung);
     };
 </script>
+
 </body>
 </html>
