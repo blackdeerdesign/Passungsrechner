@@ -115,5 +115,5 @@
             { "Wellenpassung": "f7", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "-62", "Grenzabmass_min": "-119" },
             { "Wellenpassung": "f7", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "-62", "Grenzabmass_min": "-119" },
             { "Wellenpassung": "f7", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "-68", "Grenzabmass_min": "-131" },
-            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "-68", "Grenzabmass_min": "-131" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "-68", "Grenzabmass_min": "-131" }
 ]
