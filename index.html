@@ -1,0 +1,468 @@
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gilztech - Passungsrechner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Aptos", sans-serif;
+            font-size: 13px;
+            background-color: #f0f0f0;
+        }
+
+        .header-white {
+            background-color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-white img {
+            max-width: 250px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .banner {
+            background-color: #000000;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .banner h1 {
+            font-size: 1.5rem;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        table {
+            width: 300px;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0CA1E3;
+            color: white;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        td:first-child, th:first-child {
+            width: 180px; 
+        }
+
+        td:last-child, th:last-child {
+            width: 120px;
+        }
+
+        h3 {
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #0CA1E3;
+            color: #ffffff;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .back-button:hover {
+            background-color: #0890CC;
+        }
+    </style>
+</head>
+<body>
+    <header class="header-white">
+        <img src="logo.jpg" alt="Logo">
+    </header>
+
+    <div class="banner">
+        <h1>Passungsrechner</h1>
+    </div>
+
+    <main>
+
+        <div class="container">
+            <table>
+                <tr>
+                    <td><label for="zahl">Durchmesser:</label></td>
+                    <td><input type="number" id="zahl" step="1" oninput="berechnen(); berechnenBohrung();"></td>
+                </tr>
+            </table>
+
+            <div class="box result">
+                <h3>Wellen</h3>
+                <label for="wellenpassung">Wellenpassung auswählen:</label>
+                <select id="wellenpassung" onchange="berechnen()">
+                    <option value="f7">f7</option>
+                    <option value="h5">h5</option>
+                    <option value="h6">h6</option>
+                    <option value="h9">h9</option>
+                    <option value="h11">h11</option>
+                </select>
+                <table>
+                    <tr><td>Grenzabmaß max:</td><td id="grenzabmass_max"></td></tr>
+                    <tr><td>Grenzabmaß min:</td><td id="grenzabmass_min"></td></tr>
+                    <tr><td>Minimaler Durchmesser:</td><td id="min_durchmesser"></td></tr>
+                    <tr><td>Maximaler Durchmesser:</td><td id="max_durchmesser"></td></tr>
+                </table>
+            </div>
+
+            <div class="box result">
+                <h3>Bohrungen</h3>
+                <label for="bohrungspassung">Bohrungspassung auswählen:</label>
+                <select id="bohrungspassung" onchange="berechnenBohrung()">
+                    <option value="H7">H7</option>
+                    <option value="H6">H6</option>
+                    <option value="H8">H8</option>
+                    <option value="H11">H11</option>
+                    <option value="J6">J6</option>
+                </select>
+                <table>
+                    <tr><td>Grenzabmaß max:</td><td id="grenzabmass_max_bohrung"></td></tr>
+                    <tr><td>Grenzabmaß min:</td><td id="grenzabmass_min_bohrung"></td></tr>
+                    <tr><td>Minimaler Durchmesser:</td><td id="min_durchmesser_bohrung"></td></tr>
+                    <tr><td>Maximaler Durchmesser:</td><td id="max_durchmesser_bohrung"></td></tr>
+                </table>
+            </div>
+        </div>
+    </main>
+
+
+    <script>
+        function formatNumber(value) {
+            return parseFloat(value.toFixed(3)).toString();
+        }
+
+        const datenWellen = [
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "0", "Grenzabmass_min": "-4" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "0", "Grenzabmass_min": "-5" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "0", "Grenzabmass_min": "-6" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "18", "Grenzabmass_max": "0", "Grenzabmass_min": "-8" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "30", "Grenzabmass_max": "0", "Grenzabmass_min": "-9" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "0", "Grenzabmass_min": "-11" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "0", "Grenzabmass_min": "-11" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "0", "Grenzabmass_min": "-13" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "0", "Grenzabmass_min": "-13" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "0", "Grenzabmass_min": "-15" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "0", "Grenzabmass_min": "-15" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "0", "Grenzabmass_min": "-18" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "0", "Grenzabmass_min": "-18" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "0", "Grenzabmass_min": "-18" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "0", "Grenzabmass_min": "-20" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "0", "Grenzabmass_min": "-20" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "0", "Grenzabmass_min": "-20" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "0", "Grenzabmass_min": "-23" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "0", "Grenzabmass_min": "-23" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "0", "Grenzabmass_min": "-25" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "0", "Grenzabmass_min": "-25" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "0", "Grenzabmass_min": "-27" },
+            { "Wellenpassung": "h5", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "0", "Grenzabmass_min": "-27" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "0", "Grenzabmass_min": "-6" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "0", "Grenzabmass_min": "-8" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "0", "Grenzabmass_min": "-9" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "18", "Grenzabmass_max": "0", "Grenzabmass_min": "-11" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "30", "Grenzabmass_max": "0", "Grenzabmass_min": "-13" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "0", "Grenzabmass_min": "-16" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "0", "Grenzabmass_min": "-16" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "0", "Grenzabmass_min": "-19" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "0", "Grenzabmass_min": "-19" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "0", "Grenzabmass_min": "-22" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "0", "Grenzabmass_min": "-22" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "0", "Grenzabmass_min": "-25" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "0", "Grenzabmass_min": "-25" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "0", "Grenzabmass_min": "-25" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "0", "Grenzabmass_min": "-29" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "0", "Grenzabmass_min": "-29" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "0", "Grenzabmass_min": "-29" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "0", "Grenzabmass_min": "-32" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "0", "Grenzabmass_min": "-32" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "0", "Grenzabmass_min": "-36" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "0", "Grenzabmass_min": "-36" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "0", "Grenzabmass_min": "-40" },
+            { "Wellenpassung": "h6", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "0", "Grenzabmass_min": "-40" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "0", "Grenzabmass_min": "-25" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "0", "Grenzabmass_min": "-30" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "0", "Grenzabmass_min": "-36" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "18", "Grenzabmass_max": "0", "Grenzabmass_min": "-43" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "30", "Grenzabmass_max": "0", "Grenzabmass_min": "-52" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "0", "Grenzabmass_min": "-62" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "0", "Grenzabmass_min": "-62" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "0", "Grenzabmass_min": "-74" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "0", "Grenzabmass_min": "-74" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "0", "Grenzabmass_min": "-87" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "0", "Grenzabmass_min": "-87" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "0", "Grenzabmass_min": "-100" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "0", "Grenzabmass_min": "-100" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "0", "Grenzabmass_min": "-100" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "0", "Grenzabmass_min": "-115" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "0", "Grenzabmass_min": "-115" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "0", "Grenzabmass_min": "-115" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "0", "Grenzabmass_min": "-130" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "0", "Grenzabmass_min": "-130" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "0", "Grenzabmass_min": "-140" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "0", "Grenzabmass_min": "-140" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "0", "Grenzabmass_min": "-155" },
+            { "Wellenpassung": "h9", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "0", "Grenzabmass_min": "-155" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "0", "Grenzabmass_min": "-60" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "0", "Grenzabmass_min": "-75" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "0", "Grenzabmass_min": "-90" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "18", "Grenzabmass_max": "0", "Grenzabmass_min": "-110" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "30", "Grenzabmass_max": "0", "Grenzabmass_min": "-130" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "0", "Grenzabmass_min": "-160" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "0", "Grenzabmass_min": "-160" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "0", "Grenzabmass_min": "-190" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "0", "Grenzabmass_min": "-190" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "0", "Grenzabmass_min": "-220" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "0", "Grenzabmass_min": "-220" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "0", "Grenzabmass_min": "-250" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "0", "Grenzabmass_min": "-250" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "0", "Grenzabmass_min": "-250" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "0", "Grenzabmass_min": "-290" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "0", "Grenzabmass_min": "-290" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "0", "Grenzabmass_min": "-290" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "0", "Grenzabmass_min": "-320" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "0", "Grenzabmass_min": "-320" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "0", "Grenzabmass_min": "-360" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "0", "Grenzabmass_min": "-360" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "0", "Grenzabmass_min": "-400" },
+            { "Wellenpassung": "h11", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "0", "Grenzabmass_min": "-400" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "-6", "Grenzabmass_min": "-16" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "-10", "Grenzabmass_min": "-22" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "-13", "Grenzabmass_min": "-28" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "14", "Grenzabmass_max": "-16", "Grenzabmass_min": "-34" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "14", "Nennmassbereich_bis": "18", "Grenzabmass_max": "-16", "Grenzabmass_min": "-34" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "24", "Grenzabmass_max": "-20", "Grenzabmass_min": "-41" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "24", "Nennmassbereich_bis": "30", "Grenzabmass_max": "-20", "Grenzabmass_min": "-41" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "-25", "Grenzabmass_min": "-50" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "-25", "Grenzabmass_min": "-50" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "-30", "Grenzabmass_min": "-60" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "-30", "Grenzabmass_min": "-60" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "-36", "Grenzabmass_min": "-71" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "-36", "Grenzabmass_min": "-71" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "-43", "Grenzabmass_min": "-83" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "-43", "Grenzabmass_min": "-83" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "-43", "Grenzabmass_min": "-83" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "-50", "Grenzabmass_min": "-96" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "-50", "Grenzabmass_min": "-96" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "-50", "Grenzabmass_min": "-96" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "-56", "Grenzabmass_min": "-108" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "-56", "Grenzabmass_min": "-108" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "-62", "Grenzabmass_min": "-119" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "-62", "Grenzabmass_min": "-119" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "-68", "Grenzabmass_min": "-131" },
+            { "Wellenpassung": "f7", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "-68", "Grenzabmass_min": "-131" },
+
+
+        ];
+        
+        const datenBohrungen = [
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "6", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "8", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "9", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "14", "Grenzabmass_max": "11", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "14", "Nennmassbereich_bis": "18", "Grenzabmass_max": "11", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "24", "Grenzabmass_max": "13", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "24", "Nennmassbereich_bis": "30", "Grenzabmass_max": "13", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "16", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "16", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "19", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "19", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "22", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "22", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "25", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "25", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "25", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "29", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "29", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "29", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "32", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "32", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "36", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "36", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "40", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H6", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "40", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "10", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "12", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "15", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "14", "Grenzabmass_max": "18", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "14", "Nennmassbereich_bis": "18", "Grenzabmass_max": "18", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "24", "Grenzabmass_max": "21", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "24", "Nennmassbereich_bis": "30", "Grenzabmass_max": "21", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "25", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "25", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "30", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "30", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "35", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "35", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "40", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "40", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "40", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "46", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "46", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "46", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "52", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "52", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "57", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "57", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "63", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H7", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "63", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "14", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "18", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "22", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "14", "Grenzabmass_max": "27", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "14", "Nennmassbereich_bis": "18", "Grenzabmass_max": "27", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "24", "Grenzabmass_max": "33", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "24", "Nennmassbereich_bis": "30", "Grenzabmass_max": "33", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "39", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "39", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "46", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "46", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "54", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "54", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "63", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "63", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "63", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "72", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "72", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "72", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "81", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "81", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "89", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "89", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "97", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H8", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "97", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "60", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "75", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "90", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "14", "Grenzabmass_max": "110", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "14", "Nennmassbereich_bis": "18", "Grenzabmass_max": "110", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "24", "Grenzabmass_max": "130", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "24", "Nennmassbereich_bis": "30", "Grenzabmass_max": "130", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "160", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "160", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "190", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "190", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "220", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "220", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "250", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "250", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "250", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "290", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "290", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "290", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "320", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "320", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "360", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "360", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "400", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "H11", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "400", "Grenzabmass_min": "0" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "0", "Nennmassbereich_bis": "3", "Grenzabmass_max": "2", "Grenzabmass_min": "-4" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "3", "Nennmassbereich_bis": "6", "Grenzabmass_max": "5", "Grenzabmass_min": "-3" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "6", "Nennmassbereich_bis": "10", "Grenzabmass_max": "5", "Grenzabmass_min": "-4" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "10", "Nennmassbereich_bis": "18", "Grenzabmass_max": "6", "Grenzabmass_min": "-5" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "18", "Nennmassbereich_bis": "30", "Grenzabmass_max": "8", "Grenzabmass_min": "-5" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "30", "Nennmassbereich_bis": "40", "Grenzabmass_max": "10", "Grenzabmass_min": "-6" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "40", "Nennmassbereich_bis": "50", "Grenzabmass_max": "10", "Grenzabmass_min": "-6" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "50", "Nennmassbereich_bis": "65", "Grenzabmass_max": "13", "Grenzabmass_min": "-6" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "65", "Nennmassbereich_bis": "80", "Grenzabmass_max": "13", "Grenzabmass_min": "-6" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "80", "Nennmassbereich_bis": "100", "Grenzabmass_max": "16", "Grenzabmass_min": "-6" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "100", "Nennmassbereich_bis": "120", "Grenzabmass_max": "16", "Grenzabmass_min": "-6" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "120", "Nennmassbereich_bis": "140", "Grenzabmass_max": "18", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "140", "Nennmassbereich_bis": "160", "Grenzabmass_max": "18", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "160", "Nennmassbereich_bis": "180", "Grenzabmass_max": "18", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "180", "Nennmassbereich_bis": "200", "Grenzabmass_max": "22", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "200", "Nennmassbereich_bis": "225", "Grenzabmass_max": "22", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "225", "Nennmassbereich_bis": "250", "Grenzabmass_max": "22", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "250", "Nennmassbereich_bis": "280", "Grenzabmass_max": "25", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "280", "Nennmassbereich_bis": "315", "Grenzabmass_max": "25", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "315", "Nennmassbereich_bis": "355", "Grenzabmass_max": "29", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "355", "Nennmassbereich_bis": "400", "Grenzabmass_max": "29", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "400", "Nennmassbereich_bis": "450", "Grenzabmass_max": "33", "Grenzabmass_min": "-7" },
+            { "Bohrungspassung": "J6", "Nennmassbereich_ueber": "450", "Nennmassbereich_bis": "500", "Grenzabmass_max": "33", "Grenzabmass_min": "-7" },
+
+        ];
+
+        function berechnen() {
+            let zahl = parseFloat(document.getElementById('zahl').value);
+            let wellenpassung = document.getElementById('wellenpassung').value;
+            
+            if (isNaN(zahl)) return;
+            
+            let eintrag = datenWellen.find(d => d.Wellenpassung === wellenpassung && 
+                zahl >= d.Nennmassbereich_ueber && 
+                zahl <= d.Nennmassbereich_bis);
+            
+            if (eintrag) {
+                document.getElementById('grenzabmass_max').innerText = eintrag.Grenzabmass_max + ' µm';
+                document.getElementById('grenzabmass_min').innerText = eintrag.Grenzabmass_min + ' µm';
+                document.getElementById('min_durchmesser').innerText = formatNumber(zahl + eintrag.Grenzabmass_min / 1000) + ' mm';
+                document.getElementById('max_durchmesser').innerText = formatNumber(zahl + eintrag.Grenzabmass_max / 1000) + ' mm';
+            }
+        }
+        
+        function berechnenBohrung() {
+            let zahl = parseFloat(document.getElementById('zahl').value);
+            let bohrungspassung = document.getElementById('bohrungspassung').value;
+            
+            if (isNaN(zahl)) return;
+            
+            let eintrag = datenBohrungen.find(d => d.Bohrungspassung === bohrungspassung && 
+                zahl >= d.Nennmassbereich_ueber && 
+                zahl <= d.Nennmassbereich_bis);
+            
+            if (eintrag) {
+                document.getElementById('grenzabmass_max_bohrung').innerText = eintrag.Grenzabmass_max + ' µm';
+                document.getElementById('grenzabmass_min_bohrung').innerText = eintrag.Grenzabmass_min + ' µm';
+                document.getElementById('min_durchmesser_bohrung').innerText = formatNumber(zahl + eintrag.Grenzabmass_min / 1000) + ' mm';
+                document.getElementById('max_durchmesser_bohrung').innerText = formatNumber(zahl + eintrag.Grenzabmass_max / 1000) + ' mm';
+            }
+        }
+    </script>
+
+</body>
+</html>
