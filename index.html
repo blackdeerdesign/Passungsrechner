@@ -177,7 +177,7 @@
         </div>
     </main>
 
-    <script>
+<script>
     let datenWellen = [];
     let datenBohrungen = [];
 
@@ -199,11 +199,14 @@
         
         let zahl = parseFloat(document.getElementById('zahl').value);
         let wellenpassung = document.getElementById('wellenpassung').value;
+        
         if (isNaN(zahl)) return;
         
-        let eintrag = datenWellen.find(d => d.Wellenpassung === wellenpassung && 
+        let eintrag = datenWellen.find(d => 
+            d.Wellenpassung === wellenpassung &&
             zahl >= d.Nennmassbereich_ueber && 
-            zahl <= d.Nennmassbereich_bis);
+            zahl <= d.Nennmassbereich_bis
+        );
         
         if (eintrag) {
             document.getElementById('grenzabmass_max').innerText = eintrag.Grenzabmass_max + ' µm';
@@ -218,11 +221,14 @@
         
         let zahl = parseFloat(document.getElementById('zahl').value);
         let bohrungspassung = document.getElementById('bohrungspassung').value;
+        
         if (isNaN(zahl)) return;
         
-        let eintrag = datenBohrungen.find(d => d.Bohrungspassung === bohrungspassung && 
+        let eintrag = datenBohrungen.find(d => 
+            d.Bohrungspassung === bohrungspassung && 
             zahl >= d.Nennmassbereich_ueber && 
-            zahl <= d.Nennmassbereich_bis);
+            zahl <= d.Nennmassbereich_bis
+        );
         
         if (eintrag) {
             document.getElementById('grenzabmass_max_bohrung').innerText = eintrag.Grenzabmass_max + ' µm';
@@ -240,6 +246,7 @@
         document.getElementById('bohrungspassung').addEventListener('change', berechnenBohrung);
     };
 </script>
+
 
 </body>
 </html>
