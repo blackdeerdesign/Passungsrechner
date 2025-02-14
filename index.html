@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -71,49 +70,67 @@
         </div>
     </main>
     <script>
-        let datenWellen = [];
-        let datenBohrungen = [];
+    let datenWellen = [];
+    let datenBohrungen = [];
 
-        async function ladeDaten() {
+    async function ladeDaten() {
+        try {
             datenWellen = await fetch("datenWellen.json").then(res => res.json());
             datenBohrungen = await fetch("datenBohrungen.json").then(res => res.json());
+        } catch (error) {
+            console.error("Fehler beim Laden der JSON-Daten:", error);
         }
+    }
 
-        function formatNumber(value) {
-            return parseFloat(value.toFixed(3)).toString();
+    function formatNumber(value) {
+        return parseFloat(value.toFixed(3)).toString();
+    }
+
+    function berechnen() {
+        if (datenWellen.length === 0) return; // Warten, bis Daten geladen sind
+        
+        let zahl = parseFloat(document.getElementById('zahl').value);
+        let wellenpassung = document.getElementById('wellenpassung').value;
+        if (isNaN(zahl)) return;
+        
+        let eintrag = datenWellen.find(d => d.Wellenpassung === wellenpassung && 
+            zahl >= d.Nennmassbereich_ueber && 
+            zahl <= d.Nennmassbereich_bis);
+        
+        if (eintrag) {
+            document.getElementById('grenzabmass_max').innerText = eintrag.Grenzabmass_max + ' µm';
+            document.getElementById('grenzabmass_min').innerText = eintrag.Grenzabmass_min + ' µm';
+            document.getElementById('min_durchmesser').innerText = formatNumber(zahl + eintrag.Grenzabmass_min / 1000) + ' mm';
+            document.getElementById('max_durchmesser').innerText = formatNumber(zahl + eintrag.Grenzabmass_max / 1000) + ' mm';
         }
+    }
 
-        function berechnen() {
-            let zahl = parseFloat(document.getElementById('zahl').value);
-            let wellenpassung = document.getElementById('wellenpassung').value;
-            if (isNaN(zahl)) return;
-            let eintrag = datenWellen.find(d => d.Wellenpassung === wellenpassung && 
-                zahl >= d.Nennmassbereich_ueber && 
-                zahl <= d.Nennmassbereich_bis);
-            if (eintrag) {
-                document.getElementById('grenzabmass_max').innerText = eintrag.Grenzabmass_max + ' µm';
-                document.getElementById('grenzabmass_min').innerText = eintrag.Grenzabmass_min + ' µm';
-                document.getElementById('min_durchmesser').innerText = formatNumber(zahl + eintrag.Grenzabmass_min / 1000) + ' mm';
-                document.getElementById('max_durchmesser').innerText = formatNumber(zahl + eintrag.Grenzabmass_max / 1000) + ' mm';
-            }
+    function berechnenBohrung() {
+        if (datenBohrungen.length === 0) return; // Warten, bis Daten geladen sind
+        
+        let zahl = parseFloat(document.getElementById('zahl').value);
+        let bohrungspassung = document.getElementById('bohrungspassung').value;
+        if (isNaN(zahl)) return;
+        
+        let eintrag = datenBohrungen.find(d => d.Bohrungspassung === bohrungspassung && 
+            zahl >= d.Nennmassbereich_ueber && 
+            zahl <= d.Nennmassbereich_bis);
+        
+        if (eintrag) {
+            document.getElementById('grenzabmass_max_bohrung').innerText = eintrag.Grenzabmass_max + ' µm';
+            document.getElementById('grenzabmass_min_bohrung').innerText = eintrag.Grenzabmass_min + ' µm';
+            document.getElementById('min_durchmesser_bohrung').innerText = formatNumber(zahl + eintrag.Grenzabmass_min / 1000) + ' mm';
+            document.getElementById('max_durchmesser_bohrung').innerText = formatNumber(zahl + eintrag.Grenzabmass_max / 1000) + ' mm';
         }
+    }
 
-        function berechnenBohrung() {
-            let zahl = parseFloat(document.getElementById('zahl').value);
-            let bohrungspassung = document.getElementById('bohrungspassung').value;
-            if (isNaN(zahl)) return;
-            let eintrag = datenBohrungen.find(d => d.Bohrungspassung === bohrungspassung && 
-                zahl >= d.Nennmassbereich_ueber && 
-                zahl <= d.Nennmassbereich_bis);
-            if (eintrag) {
-                document.getElementById('grenzabmass_max_bohrung').innerText = eintrag.Grenzabmass_max + ' µm';
-                document.getElementById('grenzabmass_min_bohrung').innerText = eintrag.Grenzabmass_min + ' µm';
-                document.getElementById('min_durchmesser_bohrung').innerText = formatNumber(zahl + eintrag.Grenzabmass_min / 1000) + ' mm';
-                document.getElementById('max_durchmesser_bohrung').innerText = formatNumber(zahl + eintrag.Grenzabmass_max / 1000) + ' mm';
-            }
-        }
-
-        window.onload = ladeDaten;
-    </script>
+    window.onload = async function() {
+        await ladeDaten(); // Lade die JSON-Daten zuerst
+        document.getElementById('zahl').addEventListener('input', berechnen);
+        document.getElementById('zahl').addEventListener('input', berechnenBohrung);
+        document.getElementById('wellenpassung').addEventListener('change', berechnen);
+        document.getElementById('bohrungspassung').addEventListener('change', berechnenBohrung);
+    };
+</script>
 </body>
 </html>
